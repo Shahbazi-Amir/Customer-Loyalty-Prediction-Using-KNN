@@ -105,4 +105,99 @@ print(f"Precision: {precision:.2f}")
 print(f"Recall: {recall:.2f}")
 print(f"F1-Score: {f1:.2f}")
 
-print(data['Churn'].value_counts())
+# Import StandardScaler for feature scaling
+from sklearn.preprocessing import StandardScaler
+
+# Create a scaler object
+scaler = StandardScaler()
+
+# Fit the scaler on training data and transform both train and test sets
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Initialize KNN model again with n_neighbors=5
+knn_scaled = KNeighborsClassifier(n_neighbors=5)
+
+# Train the model on scaled data
+knn_scaled.fit(X_train_scaled, y_train)
+
+# Predict on the scaled test data
+y_pred_scaled = knn_scaled.predict(X_test_scaled)
+
+# Calculate evaluation metrics again
+accuracy_scaled = accuracy_score(y_test, y_pred_scaled)
+precision_scaled = precision_score(y_test, y_pred_scaled)
+recall_scaled = recall_score(y_test, y_pred_scaled)
+f1_scaled = f1_score(y_test, y_pred_scaled)
+
+# Print the results after scaling
+print("\nModel Evaluation Metrics After Scaling:")
+print(f"Accuracy: {accuracy_scaled:.2f}")
+print(f"Precision: {precision_scaled:.2f}")
+print(f"Recall: {recall_scaled:.2f}")
+print(f"F1-Score: {f1_scaled:.2f}")
+
+
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# محاسبه ماتریس درهم‌ریختگی
+cm = confusion_matrix(y_test, y_pred_scaled)
+
+# رسم نمودار
+plt.figure(figsize=(6, 4))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            xticklabels=['No Churn', 'Churn'],
+            yticklabels=['No Churn', 'Churn'])
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix after Scaling')
+plt.show()
+
+
+from sklearn.model_selection import GridSearchCV
+
+# لیست مقادیر k که می‌خوایم تست کنیم
+param_grid = {'n_neighbors': list(range(1, 20))}
+
+# ساخت GridSearchCV
+grid_search = GridSearchCV(
+    estimator=KNeighborsClassifier(),   # مدل ما (KNN)
+    param_grid=param_grid,              # مقادیر k
+    cv=5,                               # 5-fold cross validation
+    scoring='f1',                       # معیار بهینه‌سازی: F1-Score
+    verbose=1,                          # لاگ توسط لاگ اجرا رو نشون بده
+    n_jobs=-1                           # از تمام هسته‌های CPU استفاده کن
+)
+
+# اجرای GridSearch روی داده‌های استاندارد شده
+grid_search.fit(X_train_scaled, y_train)
+
+# نمایش بهترین k
+print("بهترین k:", grid_search.best_params_['n_neighbors'])
+print("بهترین F1-Score در آموزش:", grid_search.best_score_)
+
+
+
+from sklearn.model_selection import GridSearchCV
+
+# لیست مقادیر k که می‌خوایم تست کنیم
+param_grid = {'n_neighbors': list(range(1, 20))}
+
+# ساخت GridSearchCV
+grid_search = GridSearchCV(
+    estimator=KNeighborsClassifier(),   # مدل ما (KNN)
+    param_grid=param_grid,              # مقادیر k
+    cv=5,                               # 5-fold cross validation
+    scoring='f1',                       # معیار بهینه‌سازی: F1-Score
+    verbose=1,                          # لاگ توسط لاگ اجرا رو نشون بده
+    n_jobs=-1                           # از تمام هسته‌های CPU استفاده کن
+)
+
+# اجرای GridSearch روی داده‌های استاندارد شده
+grid_search.fit(X_train_scaled, y_train)
+
+# نمایش بهترین k
+print("بهترین k:", grid_search.best_params_['n_neighbors'])
+print("بهترین F1-Score در آموزش:", grid_search.best_score_)
